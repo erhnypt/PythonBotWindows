@@ -1,11 +1,7 @@
 import json
-import talib
 import numpy
-import pandas_ta
-
-
 import websocket
-
+import talib
 SOCKET="wss://stream.binance.com:9443/ws/ethusdt@kline_1m"
 SlowEma_Period=28
 FastEma_Period=9
@@ -113,18 +109,23 @@ def on_message(ws,message):
         highes.append(float(candle_High))
         lowes.append(float(candle_Low))
         print(closes)
-        if len(closes)>28:
+        if len(closes)<28:
             np_closes=numpy.array(closes)
             np_lowes=numpy.array(lowes)
             np_highes=numpy.array(highes)
-            FastEma=talib.ema(np_closes,FastEma_Period)
-            SlowEma=talib.ema(np_highes,SlowEma_Period)
-            stotastic=numpy.stoch(np_highes,np_lowes,np_closes,smooth_k=3,k=3)
-            print(f"FastEma : {FastEma}")
-            print(f"SlowEma : {SlowEma}")
-            print(f"stotastic : {stotastic}")
 
-            buy_or_sell(FastEma,SlowEma,stotastic)
+            FastEmaList = talib.EMA(np_closes, FastEma_Period)
+            FastEma = FastEmaList[-1]
+            SlowEmaList = talib.EMA(np_closes, SlowEma_Period)
+            SlowEma = SlowEmaList[-1]
+            StotasticList=numpy.STOCH(np_highes,np_lowes,np_closes,smooth_k=3,k=14)
+            Stotastic_A=StotasticList[-14][0]
+            Stotastic_B=StotasticList[-14][1]
+            print("Stotastic_A",Stotastic_A)
+            print("Stotastic_B",Stotastic_B)
+
+
+        buy_or_sell(FastEma,SlowEma)#,SlowEma,stotastic)
 
 
 
